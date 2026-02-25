@@ -1,9 +1,13 @@
-# Frontend-only Quotation Print POC
+# Frontend-only Quotation Print POC (Vue.js)
 
 ตัวอย่างนี้เป็น POC แบบไม่พึ่ง backend สำหรับเดโมการ:
 - Preview เอกสาร Quotation
 - เปิด/ปิด Stamp, Signature, Watermark
 - สั่งพิมพ์เฉพาะเอกสารใน iframe (`contentWindow.print()`)
+- Save to PDF ผ่าน browser print dialog
+
+## Tech Stack
+- Vue.js 3 (CDN) — ไม่ต้อง npm build
 
 ## วิธีรันหน้าเว็บจริง (แนะนำ)
 > ไม่ต้องใช้ npm/dotnet
@@ -27,12 +31,8 @@ http://localhost:4173/document-print-ui/index.html
    - กด **Print HTML** เพื่อสั่งพิมพ์จาก iframe
    - กด **Save to PDF** แล้วเลือกปลายทางใน print dialog ของ browser
 
-## ทางเลือก: เปิดไฟล์ตรง
-สามารถเปิดไฟล์ `document-print-ui/index.html` ตรง ๆ ได้เช่นกัน แต่แนะนำให้รันผ่าน http server เพื่อเลี่ยงข้อจำกัดบาง browser
-
 ## ไฟล์สำคัญ
-- `document-print-ui/index.html` : หน้าเดโมทั้งหมด (UI + template + print logic)
+- `document-print-ui/index.html` : หน้าเดโมทั้งหมด (Vue app + template + print logic)
 
 ## หมายเหตุ
-- โปรเจกต์นี้จงใจทำให้รันได้ทันทีใน environment ที่ติดข้อจำกัด npm/dotnet
 - ถ้าต้องการเวอร์ชัน React + ASP.NET Core เต็มรูปแบบ สามารถต่อยอดจากโครงนี้ได้

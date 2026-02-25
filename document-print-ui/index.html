@@ -3,180 +3,117 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quotation Print POC (Frontend Only)</title>
+    <title>Quotation Print POC (Vue.js)</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
       :root {
         font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         color: #0f172a;
         background: #f1f5f9;
       }
-
       * { box-sizing: border-box; }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-      }
-
-      .app {
-        display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 16px;
-        padding: 16px;
-      }
-
-      .panel {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-      }
-
-      .preview-wrap {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      .preview-header {
-        padding: 12px 16px;
-        border-bottom: 1px solid #e2e8f0;
-        font-weight: 600;
-      }
-
-      iframe {
-        width: 100%;
-        height: calc(100vh - 90px);
-        border: 0;
-        background: #f8fafc;
-      }
-
-      .settings {
-        padding: 16px;
-      }
-
-      .settings h2 {
-        margin-top: 0;
-        margin-bottom: 12px;
-        font-size: 18px;
-      }
-
-      .field {
-        margin-bottom: 14px;
-      }
-
-      label {
-        font-size: 14px;
-        color: #334155;
-      }
-
-      select, button {
-        width: 100%;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        padding: 10px 12px;
-        font-size: 14px;
-      }
-
-      button {
-        cursor: pointer;
-        background: #0f172a;
-        color: #fff;
-        border: none;
-        margin-top: 8px;
-      }
-
-      button.secondary {
-        background: #334155;
-      }
-
-      button.light {
-        background: #e2e8f0;
-        color: #0f172a;
-      }
-
-      .hint {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #64748b;
-      }
-
-      @media (max-width: 1024px) {
-        .app { grid-template-columns: 1fr; }
-        iframe { height: 65vh; }
-      }
-
-      @media print {
-        body > .app > .settings.panel { display: none; }
-      }
+      body { margin: 0; min-height: 100vh; }
+      .app { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px; }
+      .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+      .preview-wrap { display: flex; flex-direction: column; overflow: hidden; }
+      .preview-header { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; }
+      iframe { width: 100%; height: calc(100vh - 90px); border: 0; background: #f8fafc; }
+      .settings { padding: 16px; }
+      .settings h2 { margin-top: 0; margin-bottom: 12px; font-size: 18px; }
+      .field { margin-bottom: 14px; }
+      label { font-size: 14px; color: #334155; }
+      select, button { width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 12px; font-size: 14px; }
+      button { cursor: pointer; background: #0f172a; color: #fff; border: none; margin-top: 8px; }
+      button.secondary { background: #334155; }
+      button.light { background: #e2e8f0; color: #0f172a; }
+      .hint { margin-top: 12px; font-size: 12px; color: #64748b; }
+      @media (max-width: 1024px) { .app { grid-template-columns: 1fr; } iframe { height: 65vh; } }
+      @media print { body > #app > .app > .settings.panel { display: none; } }
     </style>
   </head>
   <body>
-    <main class="app">
-      <section class="preview-wrap panel">
-        <div class="preview-header">Quotation HTML Preview</div>
-        <iframe id="previewFrame" title="quotation-preview"></iframe>
-      </section>
+    <div id="app">
+      <main class="app">
+        <section class="preview-wrap panel">
+          <div class="preview-header">Quotation HTML Preview (Vue.js)</div>
+          <iframe ref="previewFrame" :srcdoc="previewHtml" title="quotation-preview"></iframe>
+        </section>
 
-      <aside class="settings panel">
-        <h2>Print Settings</h2>
+        <aside class="settings panel">
+          <h2>Print Settings</h2>
 
-        <div class="field">
-          <label><input id="showStamp" type="checkbox" checked /> แสดงตราประทับ (Stamp)</label>
-        </div>
+          <div class="field">
+            <label><input v-model="showStamp" type="checkbox" /> แสดงตราประทับ (Stamp)</label>
+          </div>
 
-        <div class="field">
-          <label><input id="showSignature" type="checkbox" checked /> แสดงลายเซ็น (Signature)</label>
-        </div>
+          <div class="field">
+            <label><input v-model="showSignature" type="checkbox" /> แสดงลายเซ็น (Signature)</label>
+          </div>
 
-        <div class="field">
-          <label for="watermark">Watermark</label>
-          <select id="watermark">
-            <option value="none">None</option>
-            <option value="ORIGINAL" selected>ORIGINAL</option>
-            <option value="COPY">COPY</option>
-          </select>
-        </div>
+          <div class="field">
+            <label for="watermark">Watermark</label>
+            <select id="watermark" v-model="watermark">
+              <option value="none">None</option>
+              <option value="ORIGINAL">ORIGINAL</option>
+              <option value="COPY">COPY</option>
+            </select>
+          </div>
 
-        <button id="reloadBtn" class="light">Reload Preview</button>
-        <button id="printBtn">Print HTML</button>
-        <button id="pdfBtn" class="secondary">Save to PDF</button>
-        <button id="downloadBtn" class="secondary">Download HTML</button>
+          <button id="reloadBtn" class="light" @click="reloadPreview">Reload Preview</button>
+          <button id="printBtn" @click="printHtml">Print HTML</button>
+          <button id="pdfBtn" class="secondary" @click="saveToPdf">Save to PDF</button>
+          <button id="downloadBtn" class="secondary" @click="downloadHtml">Download HTML</button>
 
-        <p class="hint">
-          ตัวอย่างนี้เป็น Frontend-only POC: ไม่มี backend แต่สามารถ Preview และ Print เอกสารผ่าน iframe ได้จริง
-        </p>
-      </aside>
-    </main>
+          <p class="hint">
+            ตัวอย่างนี้เขียนด้วย Vue.js แบบ Frontend-only: ไม่มี backend แต่ Preview/Print ได้จริง
+          </p>
+        </aside>
+      </main>
+    </div>
 
     <script>
-      const frame = document.getElementById('previewFrame');
-      const showStamp = document.getElementById('showStamp');
-      const showSignature = document.getElementById('showSignature');
-      const watermark = document.getElementById('watermark');
+      const { createApp } = Vue;
 
-      function makeTemplate(options) {
-        const items = [
-          { no: 1, description: 'SaaS Subscription - Pro Plan (12 months)', qty: 1, unitPrice: 45000 },
-          { no: 2, description: 'Implementation & onboarding package with workshop, process mapping, setup and advanced report configuration เพื่อทดสอบข้อความยาวที่ต้องตัดบรรทัดอย่างสวยงามในเอกสารใบเสนอราคา', qty: 1, unitPrice: 28500 },
-          { no: 3, description: 'Priority support (business hours)', qty: 12, unitPrice: 1200 }
-        ];
+      createApp({
+        data() {
+          return {
+            showStamp: true,
+            showSignature: true,
+            watermark: 'ORIGINAL',
+            previewHtml: ''
+          };
+        },
+        watch: {
+          showStamp: 'reloadPreview',
+          showSignature: 'reloadPreview',
+          watermark: 'reloadPreview'
+        },
+        mounted() {
+          this.reloadPreview();
+        },
+        methods: {
+          makeTemplate(options) {
+            const items = [
+              { no: 1, description: 'SaaS Subscription - Pro Plan (12 months)', qty: 1, unitPrice: 45000 },
+              { no: 2, description: 'Implementation & onboarding package with workshop, process mapping, setup and advanced report configuration เพื่อทดสอบข้อความยาวที่ต้องตัดบรรทัดอย่างสวยงามในเอกสารใบเสนอราคา', qty: 1, unitPrice: 28500 },
+              { no: 3, description: 'Priority support (business hours)', qty: 12, unitPrice: 1200 }
+            ];
 
-        const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
-        const vat = subtotal * 0.07;
-        const total = subtotal + vat;
+            const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+            const vat = subtotal * 0.07;
+            const total = subtotal + vat;
 
-        const rowHtml = items.map(item => `
-          <tr>
-            <td class="c">${item.no}</td>
-            <td>${item.description}</td>
-            <td class="r">${item.qty.toFixed(2)}</td>
-            <td class="r">${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-            <td class="r">${(item.qty * item.unitPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-          </tr>
-        `).join('');
+            const rowHtml = items.map(item => `
+              <tr>
+                <td class="c">${item.no}</td>
+                <td>${item.description}</td>
+                <td class="r">${item.qty.toFixed(2)}</td>
+                <td class="r">${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td class="r">${(item.qty * item.unitPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+              </tr>
+            `).join('');
 
-        return `<!doctype html>
+            return `<!doctype html>
 <html>
 <head>
   <meta charset="UTF-8" />
@@ -261,46 +198,34 @@
   </article>
 </body>
 </html>`;
-      }
-
-      function reloadPreview() {
-        const html = makeTemplate({
-          showStamp: showStamp.checked,
-          showSignature: showSignature.checked,
-          watermark: watermark.value
-        });
-        frame.srcdoc = html;
-      }
-
-      document.getElementById('reloadBtn').addEventListener('click', reloadPreview);
-
-      [showStamp, showSignature, watermark].forEach((control) => {
-        control.addEventListener('change', reloadPreview);
-      });
-      document.getElementById('printBtn').addEventListener('click', () => {
-        if (frame.contentWindow) {
-          frame.contentWindow.focus();
-          frame.contentWindow.print();
+          },
+          reloadPreview() {
+            this.previewHtml = this.makeTemplate({
+              showStamp: this.showStamp,
+              showSignature: this.showSignature,
+              watermark: this.watermark
+            });
+          },
+          printHtml() {
+            const frame = this.$refs.previewFrame;
+            if (frame?.contentWindow) {
+              frame.contentWindow.focus();
+              frame.contentWindow.print();
+            }
+          },
+          saveToPdf() {
+            this.printHtml();
+          },
+          downloadHtml() {
+            const blob = new Blob([this.previewHtml], { type: 'text/html;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Quotation-QO-69001.html';
+            a.click();
+            URL.revokeObjectURL(a.href);
+          }
         }
-      });
-
-      document.getElementById('pdfBtn').addEventListener('click', () => {
-        if (frame.contentWindow) {
-          frame.contentWindow.focus();
-          frame.contentWindow.print();
-        }
-      });
-
-      document.getElementById('downloadBtn').addEventListener('click', () => {
-        const blob = new Blob([frame.srcdoc], { type: 'text/html;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'Quotation-QO-69001.html';
-        a.click();
-        URL.revokeObjectURL(a.href);
-      });
-
-      reloadPreview();
+      }).mount('#app');
     </script>
   </body>
 </html>
