@@ -22,9 +22,10 @@ http://localhost:4173/document-print-ui/index.html
 ```
 
 4. กดใช้งานจากหน้าเว็บได้ทันที
-   - ปรับค่าด้านขวา
-   - กด **Reload Preview**
+   - ปรับค่าด้านขวา (Preview จะ reload realtime อัตโนมัติ)
+   - หรือกด **Reload Preview** เองได้
    - กด **Print HTML** เพื่อสั่งพิมพ์จาก iframe
+   - กด **Save to PDF** แล้วเลือกปลายทางใน print dialog ของ browser
 
 ## ทางเลือก: เปิดไฟล์ตรง
 สามารถเปิดไฟล์ `document-print-ui/index.html` ตรง ๆ ได้เช่นกัน แต่แนะนำให้รันผ่าน http server เพื่อเลี่ยงข้อจำกัดบาง browser

@@ -140,6 +140,7 @@
 
         <button id="reloadBtn" class="light">Reload Preview</button>
         <button id="printBtn">Print HTML</button>
+        <button id="pdfBtn" class="secondary">Save to PDF</button>
         <button id="downloadBtn" class="secondary">Download HTML</button>
 
         <p class="hint">
@@ -272,7 +273,18 @@
       }
 
       document.getElementById('reloadBtn').addEventListener('click', reloadPreview);
+
+      [showStamp, showSignature, watermark].forEach((control) => {
+        control.addEventListener('change', reloadPreview);
+      });
       document.getElementById('printBtn').addEventListener('click', () => {
+        if (frame.contentWindow) {
+          frame.contentWindow.focus();
+          frame.contentWindow.print();
+        }
+      });
+
+      document.getElementById('pdfBtn').addEventListener('click', () => {
         if (frame.contentWindow) {
           frame.contentWindow.focus();
           frame.contentWindow.print();
