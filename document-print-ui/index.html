@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quotation Print POC (Frontend Only)</title>
+    <style>
+      :root {
+        font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #0f172a;
+        background: #f1f5f9;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      }
+
+      .preview-wrap {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .preview-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+      }
+
+      iframe {
+        width: 100%;
+        height: calc(100vh - 90px);
+        border: 0;
+        background: #f8fafc;
+      }
+
+      .settings {
+        padding: 16px;
+      }
+
+      .settings h2 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 18px;
+      }
+
+      .field {
+        margin-bottom: 14px;
+      }
+
+      label {
+        font-size: 14px;
+        color: #334155;
+      }
+
+      select, button {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      button {
+        cursor: pointer;
+        background: #0f172a;
+        color: #fff;
+        border: none;
+        margin-top: 8px;
+      }
+
+      button.secondary {
+        background: #334155;
+      }
+
+      button.light {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+
+      .hint {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #64748b;
+      }
+
+      @media (max-width: 1024px) {
+        .app { grid-template-columns: 1fr; }
+        iframe { height: 65vh; }
+      }
+
+      @media print {
+        body > .app > .settings.panel { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="preview-wrap panel">
+        <div class="preview-header">Quotation HTML Preview</div>
+        <iframe id="previewFrame" title="quotation-preview"></iframe>
+      </section>
+
+      <aside class="settings panel">
+        <h2>Print Settings</h2>
+
+        <div class="field">
+          <label><input id="showStamp" type="checkbox" checked /> แสดงตราประทับ (Stamp)</label>
+        </div>
+
+        <div class="field">
+          <label><input id="showSignature" type="checkbox" checked /> แสดงลายเซ็น (Signature)</label>
+        </div>
+
+        <div class="field">
+          <label for="watermark">Watermark</label>
+          <select id="watermark">
+            <option value="none">None</option>
+            <option value="ORIGINAL" selected>ORIGINAL</option>
+            <option value="COPY">COPY</option>
+          </select>
+        </div>
+
+        <button id="reloadBtn" class="light">Reload Preview</button>
+        <button id="printBtn">Print HTML</button>
+        <button id="downloadBtn" class="secondary">Download HTML</button>
+
+        <p class="hint">
+          ตัวอย่างนี้เป็น Frontend-only POC: ไม่มี backend แต่สามารถ Preview และ Print เอกสารผ่าน iframe ได้จริง
+        </p>
+      </aside>
+    </main>
+
+    <script>
+      const frame = document.getElementById('previewFrame');
+      const showStamp = document.getElementById('showStamp');
+      const showSignature = document.getElementById('showSignature');
+      const watermark = document.getElementById('watermark');
+
+      function makeTemplate(options) {
+        const items = [
+          { no: 1, description: 'SaaS Subscription - Pro Plan (12 months)', qty: 1, unitPrice: 45000 },
+          { no: 2, description: 'Implementation & onboarding package with workshop, process mapping, setup and advanced report configuration เพื่อทดสอบข้อความยาวที่ต้องตัดบรรทัดอย่างสวยงามในเอกสารใบเสนอราคา', qty: 1, unitPrice: 28500 },
+          { no: 3, description: 'Priority support (business hours)', qty: 12, unitPrice: 1200 }
+        ];
+
+        const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+        const vat = subtotal * 0.07;
+        const total = subtotal + vat;
+
+        const rowHtml = items.map(item => `
+          <tr>
+            <td class="c">${item.no}</td>
+            <td>${item.description}</td>
+            <td class="r">${item.qty.toFixed(2)}</td>
+            <td class="r">${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td class="r">${(item.qty * item.unitPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          </tr>
+        `).join('');
+
+        return `<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Quotation QO-69001</title>
+  <style>
+    @page { size: A4; margin: 8mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, sans-serif; background: #f8fafc; }
+    .page { width: 194mm; min-height: 281mm; margin: 8mm auto; padding: 8mm; background: #fff; border: 1px solid #e2e8f0; position: relative; }
+    .watermark { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-28deg); font-size: 56px; font-weight: 700; letter-spacing: 6px; color: rgba(100,116,139,.16); }
+    .header { display: flex; justify-content: space-between; border-bottom: 1px solid #cbd5e1; padding-bottom: 6mm; }
+    .header h1 { margin: 0; font-size: 30px; }
+    .header h2 { margin: 2px 0 0; font-size: 14px; font-weight: 500; color: #64748b; }
+    .meta { font-size: 12px; line-height: 1.7; }
+    .grid { margin-top: 6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+    .card { border: 1px solid #dbe2ea; border-radius: 6px; padding: 3mm; font-size: 12px; line-height: 1.4; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6mm; table-layout: fixed; }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    th, td { border: 1px solid #dbe2ea; padding: 8px; font-size: 12px; vertical-align: top; word-break: break-word; }
+    th { background: #f8fafc; }
+    .r { text-align: right; } .c { text-align: center; }
+    .totals { margin-top: 4mm; margin-left: auto; width: 70mm; }
+    .totals td { border: 1px solid #dbe2ea; padding: 8px; font-size: 12px; }
+    .totals .grand td { font-weight: 700; background: #f8fafc; }
+    .signature { width: 70mm; margin-left: auto; text-align: center; margin-top: 12mm; font-size: 12px; }
+    .line { border-bottom: 1px solid #94a3b8; margin: 11mm 0 2mm; }
+    .stamp { position: absolute; right: 10mm; bottom: 10mm; width: 30mm; height: 30mm; border: 2px solid #ef4444; border-radius: 50%; color: #ef4444; display: flex; align-items: center; justify-content: center; font-weight: 700; transform: rotate(-12deg); opacity: .85; }
+    @media print { body { background: #fff; } .page { margin: 0; border: none; } }
+  </style>
+</head>
+<body>
+  <article class="page">
+    ${options.watermark !== 'none' ? `<div class="watermark">${options.watermark}</div>` : ''}
+
+    <section class="header">
+      <div>
+        <h1>Quotation</h1>
+        <h2>ใบเสนอราคา</h2>
+      </div>
+      <div class="meta">
+        <div>Quotation No: QO-69001</div>
+        <div>Issue Date: 12/01/2026</div>
+        <div>Valid Until: 19/01/2026</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card"><b>Customer</b><br>Big Star Co., Ltd.<br>99/1 Sukhumvit 21 Rd., Bangkok 10110</div>
+      <div class="card"><b>Issued By</b><br>EaseTrack Co., Ltd.<br>88 Rama IX Rd., Bangkok 10310<br>Tax ID: 0105566001234</div>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:8%" class="c">No</th>
+          <th>Description</th>
+          <th style="width:14%" class="r">Qty</th>
+          <th style="width:18%" class="r">Unit Price</th>
+          <th style="width:18%" class="r">Amount</th>
+        </tr>
+      </thead>
+      <tbody>${rowHtml}</tbody>
+    </table>
+
+    <table class="totals">
+      <tr><td>Subtotal</td><td class="r">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td></tr>
+      <tr><td>VAT 7%</td><td class="r">${vat.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td></tr>
+      <tr class="grand"><td>Grand Total (THB)</td><td class="r">${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td></tr>
+    </table>
+
+    ${options.showSignature ? `
+      <section class="signature">
+        <div>Authorized Signature</div>
+        <div class="line"></div>
+        <div><b>Napat Kittipong</b></div>
+        <div>Sales Director</div>
+      </section>
+    ` : ''}
+
+    ${options.showStamp ? '<div class="stamp">STAMP</div>' : ''}
+  </article>
+</body>
+</html>`;
+      }
+
+      function reloadPreview() {
+        const html = makeTemplate({
+          showStamp: showStamp.checked,
+          showSignature: showSignature.checked,
+          watermark: watermark.value
+        });
+        frame.srcdoc = html;
+      }
+
+      document.getElementById('reloadBtn').addEventListener('click', reloadPreview);
+      document.getElementById('printBtn').addEventListener('click', () => {
+        if (frame.contentWindow) {
+          frame.contentWindow.focus();
+          frame.contentWindow.print();
+        }
+      });
+
+      document.getElementById('downloadBtn').addEventListener('click', () => {
+        const blob = new Blob([frame.srcdoc], { type: 'text/html;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'Quotation-QO-69001.html';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      reloadPreview();
+    </script>
+  </body>
+</html>
